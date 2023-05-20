@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "UNLICENSED",
   "main": "./src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "types": "./src/index.d.ts",
   "author": {
     "name": "Gunnar Berthelsen",
     "email": "gunnar.berthelsen@gmail.com"
@@ -53,7 +53,6 @@
     "starttest": "ASERAAPPL=yoythresttest ASERACONFIG=./src/config/yoythresttest.json APPSTREAMS=../bstreams.js REST_PORT=8057 LOG_PRETTY_PRINT=true node dist/src/index.js",
     "postinstall": "tsc -p .",
     "watch-node": "nodemon dist/index.js",
-    "watch-ts": "tsc -p -w .",
-    "build": "npm install"
+    "watch-ts": "tsc -p -w ."
   }
 }
