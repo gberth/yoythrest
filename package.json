@@ -45,6 +45,9 @@
     "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
   },
+  "engines": {
+    "node": "18.x.x"
+  },  
   "scripts": {
     "start": "ASERAAPPL=yoythrest ASERACONFIG=./src/config/yoythrest.json APPSTREAMS=../bstreams.js REST_PORT=443 LOG_PRETTY_PRINT=true node src/index.js",
     "starttest": "ASERAAPPL=yoythresttest ASERACONFIG=./src/config/yoythresttest.json APPSTREAMS=../bstreams.js REST_PORT=8057 LOG_PRETTY_PRINT=true node dist/src/index.js",
