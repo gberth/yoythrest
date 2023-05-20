@@ -56,7 +56,7 @@
     "node": "18.x.x"
   },
   "scripts": {
-    "start": "ASERAAPPL=yoythrest ASERACONFIG=./src/config/yoythrest.json APPSTREAMS=../bstreams.js REST_PORT=443 LOG_PRETTY_PRINT=true node src/index.ts",
+    "start": "ASERAAPPL=yoythrest ASERACONFIG=./src/config/yoythrest.json APPSTREAMS=../bstreams.js LOG_PRETTY_PRINT=true node src/index.ts",
     "starttest": "ASERAAPPL=yoythresttest ASERACONFIG=./src/config/yoythresttest.json APPSTREAMS=../bstreams.js REST_PORT=8057 LOG_PRETTY_PRINT=true node dist/src/index.js",
     "postinstall": "tsc -p .",
     "watch-node": "nodemon dist/index.js",
