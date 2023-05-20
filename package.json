@@ -53,6 +53,7 @@
     "starttest": "ASERAAPPL=yoythresttest ASERACONFIG=./src/config/yoythresttest.json APPSTREAMS=../bstreams.js REST_PORT=8057 LOG_PRETTY_PRINT=true node dist/src/index.js",
     "postinstall": "tsc -p .",
     "watch-node": "nodemon dist/index.js",
-    "watch-ts": "tsc -p -w ."
+    "watch-ts": "tsc -p -w .",
+    "build": "npm install"
   }
 }
