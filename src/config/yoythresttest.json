@@ -1,0 +1,92 @@
+{
+    "stream": {
+        "streamId": "yoythtestserver",
+        "streamClass": "AController",
+        "streamConfig": {
+            "log": 30,
+            "streams": [
+                {
+                    "streamId": "openbankingrest",
+                    "streamClass": "RestServer",
+                    "streamConfig": {
+                        "name": "banking",
+                        "version": "1.0.0",
+                        "port": "REST_PORT",
+                        "baseroute": "",
+                        "raw": true,
+                        "autoStart": true,
+                        "routes": [
+                            {
+                                "action": "get",
+                                "route": "/yts/apiadmin/ping",
+                                "type": "bank.ping"
+                            },
+                            {
+                                "route": "/yts/bankdata/:data",
+                                "type": "bankdata"
+                            },
+                            {
+                                "route": "/yts/yoyth/:data",
+                                "raw": false,
+                                "json": true
+                            }
+                        ],
+                        "timeout": 2000
+                    }
+                },
+                {
+                    "streamId": "WsClient",
+                    "streamClass": "WsClient",
+                    "streamConfig": {
+                        "autoStart": true,
+                        "wsadress": "wss://localhost:8001",
+                        "exitOnError": true,
+                        "openmessage": {
+                            "message_data": {
+                                "type": "proxy.login"
+                            },
+                            "identity_data": {
+                                "identity": "yoythproxy"
+                            },
+                            "payload": {}
+                        },
+                        "pingmessage": {
+                            "message_data": {
+                                "message_type": "ping"
+                            },
+                            "identity_data": {
+                                "identity": "yoythproxy"
+                            },
+                            "payload": {}
+                        },
+                        "timers": [
+                            {
+                                "emitId": "ping",
+                                "ms": 30000
+                            }
+                        ]
+                    }
+                }
+            ],
+            "dispatcherMessages": [
+                {
+                    "type": "bankdata",
+                    "streams": [
+                        {
+                            "streamId": "WsClient"
+                        }
+                    ]
+                },
+                {
+                    "type": "yoyth.*",
+                    "streams": [
+                        {
+                            "streamId": "WsClient"
+                        }
+                    ]
+                }
+            ],
+            "defaults": {}
+        }
+    }
+}

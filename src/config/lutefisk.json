@@ -1,0 +1,23 @@
+{
+  "message_data": {
+    "id": "generate",
+    "message_type": "you.mapYourWs"
+  },
+  "identity_data": {
+    "identity": "g37cdcd0-ae54-11e7-b461-eb2f2858d486"
+  },
+  "payload": [
+  {"yItem": {
+    "yMetaData": {
+      "yType": "mapYourWs",
+    },
+    "yContent": {
+      "tags": ["lutefisk", "jul"],
+      "heading": "Julaften lutefisk 8-10 personer",
+      "text": "2-3 sp salt pr kilo. 2 timer til å få ut vann. Folie 2 panner, varmluft 180, brett 2 inn etter 20 minutter, sjekk etter 40-45 minutter",
+      "extra": {}
+    }
+  }
+  }
+]
+}
