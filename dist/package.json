@@ -52,9 +52,6 @@
         "build",
         "add-build"
     ],
-    "engines": {
-        "node": "18.x.x"
-    },
     "scripts": {
         "start": "ASERAAPPL=yoythrest ASERACONFIG=./src/config/yoythrest.json APPSTREAMS=../bstreams.js LOG_PRETTY_PRINT=true nodemon src/index.ts",
         "starttest": "ASERAAPPL=yoythresttest ASERACONFIG=./src/config/yoythresttest.json APPSTREAMS=../bstreams.js REST_PORT=8057 LOG_PRETTY_PRINT=true node dist/src/index.js",
