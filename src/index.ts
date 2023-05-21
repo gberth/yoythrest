@@ -1,4 +1,29 @@
 import express, { Request, Response } from 'express'
+import { Transform as Stream } from "stream";
+
+class FromWs extends Stream {
+  constructor(
+  ) {
+    super({
+      readableObjectMode: true,
+      writableObjectMode: true
+    });
+
+}
+}
+class ToWs extends Stream {
+  constructor(
+  ) {
+    super({
+      readableObjectMode: true,
+      writableObjectMode: true
+    });
+}
+}
+
+let fromws = new FromWs()
+let tows = new ToWs()
+
 
 const app = express()
 const port = process.env.PORT || 8080
