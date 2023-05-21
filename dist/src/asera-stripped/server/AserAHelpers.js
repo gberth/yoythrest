@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19,49 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.yCatch = exports.keepForRetry = exports.aItem = exports.ts = exports.listDirectory = exports.returnFileContent = exports.delay = exports.isAsync = exports.isError = exports.isResponse = exports.isAck = exports.ack = exports.createAck = exports.aseraLogger = exports.aId = exports.readCertificates = exports.awaitcondition = exports.setLogOveride = void 0;
-var AserAMessage_1 = __importDefault(require("./AserAMessage"));
-var AserAStream_1 = __importDefault(require("./AserAStream"));
-var types_1 = require("./types");
-var merge_1 = __importDefault(require("merge"));
-var moment_1 = __importDefault(require("moment"));
-var uuid_1 = __importDefault(require("uuid"));
-var readline_1 = __importDefault(require("readline"));
-var fs_1 = __importDefault(require("fs"));
-var q_1 = __importDefault(require("q"));
+const AserAMessage_1 = __importDefault(require("./AserAMessage"));
+const AserAStream_1 = __importDefault(require("./AserAStream"));
+const types_1 = require("./types");
+const merge_1 = __importDefault(require("merge"));
+const moment_1 = __importDefault(require("moment"));
+const uuid_1 = __importDefault(require("uuid"));
+const readline_1 = __importDefault(require("readline"));
+const fs_1 = __importDefault(require("fs"));
+const q_1 = __importDefault(require("q"));
 var mylog;
-var helperConsoleLog = function (logtxt) {
+const helperConsoleLog = (logtxt) => {
     if (mylog) {
         mylog.info(logtxt);
     }
@@ -69,7 +31,7 @@ var helperConsoleLog = function (logtxt) {
         console.log(logtxt);
     }
 };
-var setLogOveride = function (logDirect) {
+const setLogOveride = (logDirect) => {
     mylog = logDirect;
 };
 exports.setLogOveride = setLogOveride;
@@ -89,10 +51,8 @@ function promiseWhile(condition, body) {
     q_1.default.nextTick(loop); // The promise
     return done.promise;
 }
-var awaitcondition = function (condtxt, cond, loop, waitTime, quiet) {
-    if (loop === void 0) { loop = 10; }
-    if (waitTime === void 0) { waitTime = 1000; }
-    var index = 1;
+const awaitcondition = (condtxt, cond, loop = 10, waitTime = 1000, quiet) => {
+    let index = 1;
     if (!quiet) {
         helperConsoleLog("Await ".concat(condtxt) + "/" + cond());
     }
@@ -107,18 +67,18 @@ var awaitcondition = function (condtxt, cond, loop, waitTime, quiet) {
     });
 };
 exports.awaitcondition = awaitcondition;
-var timestamp = function () {
+const timestamp = () => {
     moment_1.default.defaultFormat = "YYYY-MM-DDTHH:mm:ss.SSSZ";
     return moment_1.default()
         .format()
         .trim();
 };
 function delayMs(ms) {
-    return new Promise(function (resolve) { return setTimeout(resolve, ms); });
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 function keepMessageForRetry(msg) {
     // @ts-ignore
-    var stream = this instanceof AserAStream_1.default ? this : null;
+    const stream = this instanceof AserAStream_1.default ? this : null;
     stream.outputStream.writeMessage(msg.createMessageWithThisAsMother(stream.createMessage({
         message_data: {
             type: stream.config.keepForRetryMessageType
@@ -127,77 +87,56 @@ function keepMessageForRetry(msg) {
     })));
 }
 function waitForFileContent(file, errorf) {
-    return __awaiter(this, void 0, void 0, function () {
-        var promise, data, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    promise = new Promise(function (resolve, reject) {
-                        fs_1.default.readFile(file, function (err, data) {
-                            if (err) {
-                                return reject(err);
-                            }
-                            resolve(data.toString());
-                        });
-                    });
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, promise];
-                case 2:
-                    data = _a.sent();
-                    helperConsoleLog(data);
-                    return [2 /*return*/, data.toString()];
-                case 3:
-                    error_1 = _a.sent();
-                    errorf(error_1);
-                    helperConsoleLog("Wait for file content error");
-                    helperConsoleLog(error_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
-            }
+    return __awaiter(this, void 0, void 0, function* () {
+        let promise = new Promise((resolve, reject) => {
+            fs_1.default.readFile(file, (err, data) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(data.toString());
+            });
         });
+        try {
+            let data = yield promise;
+            helperConsoleLog(data);
+            return data.toString();
+        }
+        catch (error) {
+            errorf(error);
+            helperConsoleLog("Wait for file content error");
+            helperConsoleLog(error);
+        }
     });
 }
 function waitForListDirectory(searchfor, file, errf) {
-    return __awaiter(this, void 0, void 0, function () {
-        var promise, list, error_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    promise = new Promise(function (resolve, reject) {
-                        fs_1.default.readdir(searchfor, function (err, filenames) {
-                            if (err) {
-                                reject(err);
-                            }
-                            else {
-                                var ret_1 = [];
-                                filenames.forEach(function (filename) {
-                                    if (filename.startsWith(file)) {
-                                        ret_1.push(filename);
-                                    }
-                                });
-                                resolve(ret_1);
-                            }
-                        });
+    return __awaiter(this, void 0, void 0, function* () {
+        let promise = new Promise((resolve, reject) => {
+            fs_1.default.readdir(searchfor, (err, filenames) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    let ret = [];
+                    filenames.forEach(filename => {
+                        if (filename.startsWith(file)) {
+                            ret.push(filename);
+                        }
                     });
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, promise];
-                case 2:
-                    list = _a.sent();
-                    return [2 /*return*/, list];
-                case 3:
-                    error_2 = _a.sent();
-                    return [2 /*return*/, []];
-                case 4: return [2 /*return*/];
-            }
+                    resolve(ret);
+                }
+            });
         });
+        try {
+            let list = yield promise;
+            return list;
+        }
+        catch (error) {
+            return [];
+        }
     });
 }
-var readCertificates = function (ssl) {
-    var retSsl = Object.assign({}, ssl);
+const readCertificates = (ssl) => {
+    let retSsl = Object.assign({}, ssl);
     if (ssl.ca) {
         retSsl.ca = fs_1.default
             .readFileSync(process.env[ssl.ca] || ssl.ca)
@@ -216,16 +155,15 @@ var readCertificates = function (ssl) {
     return retSsl;
 };
 exports.readCertificates = readCertificates;
-var aId = function () {
+const aId = () => {
     return uuid_1.default.v1().toString();
 };
 exports.aId = aId;
-var log = function (stream, logItem, logLevel) {
-    if (logLevel === void 0) { logLevel = types_1.LOGLEVELS.info; }
+const log = (stream, logItem, logLevel = types_1.LOGLEVELS.info) => {
     if (stream && logLevel < stream.getLog()) {
         return;
     }
-    var logtxt = (stream ? stream.streamIdentifier : "nostream") + " : ";
+    let logtxt = (stream ? stream.streamIdentifier : "nostream") + " : ";
     if (logItem.msg) {
         logtxt += logItem.msg;
         delete logItem.msg;
@@ -261,7 +199,7 @@ var log = function (stream, logItem, logLevel) {
         }
         return;
     }
-    var logObject = {
+    let logObject = {
         log_ts: exports.ts(),
         stream: stream ? stream.streamIdentifier : "nostream",
         log: logItem,
@@ -297,14 +235,13 @@ exports.aseraLogger = {
         log(this, logItem, types_1.LOGLEVELS.debug);
     }
 };
-var createAck = function (_a) {
-    var msg = _a.msg, msg_type = _a.msg_type, response = _a.response, payload = _a.payload, _b = _a.error, error = _b === void 0 ? false : _b;
+const createAck = function ({ msg, msg_type, response, payload, error = false }) {
     // @ts-ignore
     // deprectaed
-    var stream = this instanceof AserAStream_1.default ? this : null;
+    const stream = this instanceof AserAStream_1.default ? this : null;
     if (!stream)
         return null;
-    var newmsgt;
+    let newmsgt;
     if (msg_type) {
         newmsgt = msg_type;
     }
@@ -315,7 +252,7 @@ var createAck = function (_a) {
                 ? stream.config.ack.type
                 : "unknown";
     }
-    var ack = msg.createMessageWithThisAsMother(stream.createMessage({
+    let ack = msg.createMessageWithThisAsMother(stream.createMessage({
         message_data: {
             type: newmsgt
         },
@@ -338,13 +275,12 @@ var createAck = function (_a) {
     stream.outputStream.writeMessage(ack);
 };
 exports.createAck = createAck;
-var ack = function (_a) {
-    var msg = _a.msg, response = _a.response, _b = _a.error, error = _b === void 0 ? false : _b;
+const ack = function ({ msg, response, error = false }) {
     // @ts-ignore
-    var stream = this instanceof AserAStream_1.default ? this : null;
+    const stream = this instanceof AserAStream_1.default ? this : null;
     if (!stream)
         return null;
-    var newmsg = msg.createMessageWithThisAsMother(stream.createMessage({
+    let newmsg = msg.createMessageWithThisAsMother(stream.createMessage({
         message_data: {
             type: types_1.RequestType.ACK
         },
@@ -363,23 +299,23 @@ var ack = function (_a) {
     stream.outputStream.writeMessage(newmsg);
 };
 exports.ack = ack;
-var isAck = function (type) {
+const isAck = (type) => {
     return (typeof type !== "undefined" &&
         (type === types_1.RequestType.RESPONSE_WITH_ACK ||
             type === types_1.RequestType.ACK ||
             type === types_1.RequestType.ERROR));
 };
 exports.isAck = isAck;
-var isResponse = function (type) {
+const isResponse = (type) => {
     return (typeof type !== "undefined" &&
         (type === types_1.RequestType.RESPONSE_WITH_ACK || type === types_1.RequestType.RESPONSE));
 };
 exports.isResponse = isResponse;
-var isError = function (type) {
+const isError = (type) => {
     return typeof type !== "undefined" && type === types_1.RequestType.ERROR;
 };
 exports.isError = isError;
-var isAsync = function (type) {
+const isAsync = (type) => {
     return (typeof type !== "undefined" &&
         (type === types_1.RequestType.ERROR ||
             type === types_1.RequestType.RESPONSE_WITH_ACK ||
@@ -387,55 +323,33 @@ var isAsync = function (type) {
             type === types_1.RequestType.ACK));
 };
 exports.isAsync = isAsync;
-var delay = function (ms) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, delayMs(ms)];
-            case 1:
-                _a.sent();
-                return [2 /*return*/];
-        }
-    });
-}); };
+const delay = (ms) => __awaiter(void 0, void 0, void 0, function* () {
+    yield delayMs(ms);
+});
 exports.delay = delay;
-var returnFileContent = function (file, errf) { return __awaiter(void 0, void 0, void 0, function () {
-    var xx;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, waitForFileContent(file, errf)];
-            case 1:
-                xx = _a.sent();
-                return [2 /*return*/, xx];
-        }
-    });
-}); };
+const returnFileContent = (file, errf) => __awaiter(void 0, void 0, void 0, function* () {
+    let xx = yield waitForFileContent(file, errf);
+    return xx;
+});
 exports.returnFileContent = returnFileContent;
-var listDirectory = function (directory, file, errf) { return __awaiter(void 0, void 0, void 0, function () {
-    var xx;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, waitForListDirectory(directory, file, errf)];
-            case 1:
-                xx = _a.sent();
-                return [2 /*return*/, xx];
-        }
-    });
-}); };
+const listDirectory = (directory, file, errf) => __awaiter(void 0, void 0, void 0, function* () {
+    let xx = yield waitForListDirectory(directory, file, errf);
+    return xx;
+});
 exports.listDirectory = listDirectory;
-var ts = function () {
+const ts = () => {
     return timestamp();
 };
 exports.ts = ts;
-var aItem = function (_a) {
-    var itemType = _a.itemType, id = _a.id, payload = _a.payload, version = _a.version, owner = _a.owner;
-    var item = {
+const aItem = ({ itemType, id, payload, version, owner }) => {
+    let item = {
         aItem: {
             aMetaData: {
                 aId: id || uuid_1.default.v1().toString(),
                 aType: itemType,
                 aOwner: owner || ""
             },
-            aContent: __assign({}, payload)
+            aContent: Object.assign({}, payload)
         }
     };
     if (version) {
@@ -445,21 +359,21 @@ var aItem = function (_a) {
     return item;
 };
 exports.aItem = aItem;
-var keepForRetry = function (msg) {
+const keepForRetry = function (msg) {
     // create a message with msg as payload, with type= this.config.keepForRetryMessageType
     // @ts-ignore
-    var stream = this instanceof AserAStream_1.default ? this : null;
+    const stream = this instanceof AserAStream_1.default ? this : null;
     if (stream && stream.config.keepForRetryMessageType) {
         keepMessageForRetry.bind(stream)(msg);
     }
 };
 exports.keepForRetry = keepForRetry;
-var yCatch = function (errorParm) {
+const yCatch = function (errorParm) {
     // @ts-ignore
-    var stream = this instanceof AserAStream_1.default ? this : null;
+    const stream = this instanceof AserAStream_1.default ? this : null;
     helperConsoleLog("error occured " + (stream ? stream.streamIdentifier : "nostream"));
     if (stream && stream.config && stream.config.console) {
-        var readLine = function (lineHandler, resolve, reject) {
+        const readLine = (lineHandler, resolve, reject) => {
             readline_1.default
                 .createInterface({
                 input: process.stdin,
@@ -475,15 +389,15 @@ var yCatch = function (errorParm) {
             });
         };
         // @ts-ignore
-        var rl_1 = readLine.bind(this);
-        var evaluateError = function (evaluate) {
-            helperConsoleLog("Evaluate result: " + evaluate + " = " + global.eval(evaluate));
+        const rl = readLine.bind(this);
+        const evaluateError = (evaluate) => {
+            helperConsoleLog(`Evaluate result: ${evaluate} = ${global.eval(evaluate)}`);
         };
         // @ts-ignore
-        var evaluateErr_1 = evaluateError.bind(this);
-        new Promise(function (resolve, reject) {
-            rl_1(evaluateErr_1, resolve, reject);
-        }).then(function () {
+        const evaluateErr = evaluateError.bind(this);
+        new Promise((resolve, reject) => {
+            rl(evaluateErr, resolve, reject);
+        }).then(() => {
             helperConsoleLog("Good bye");
             process.exit(12);
         });
@@ -498,7 +412,7 @@ var yCatch = function (errorParm) {
     //if (errorParm.msg && JSON.stringify(errorParm.msg.payload).length > 1000) {
     //errorParm.msg.payload = JSON.stringify(errorParm.msg.payload).substr(0,1000)
     //}
-    var payload = {
+    let payload = {
         error: errorParm.error,
         stack: errorParm.error.stack,
         msg: errorParm.msg || null,
@@ -507,7 +421,7 @@ var yCatch = function (errorParm) {
     };
     if (stream && stream.outputStream && !mylog) {
         stream ? (stream.config.inError = true) : helperConsoleLog("nostream");
-        var newmsg = stream.createMessage({
+        let newmsg = stream.createMessage({
             message_data: {
                 type: "asera.error"
             },
@@ -517,15 +431,15 @@ var yCatch = function (errorParm) {
             ? errorParm.msg.createMessageWithThisAsMother(newmsg)
             : newmsg);
         if (stream && stream.config.onErrorMessageType) {
-            var newmsg_1 = stream.createMessage({
+            let newmsg = stream.createMessage({
                 message_data: {
                     type: stream.config.onErrorMessageType
                 },
                 payload: payload
             });
             stream.outputStream.writeMessage(errorParm.msg && errorParm.msg instanceof AserAMessage_1.default
-                ? errorParm.msg.createMessageWithThisAsMother(newmsg_1)
-                : newmsg_1);
+                ? errorParm.msg.createMessageWithThisAsMother(newmsg)
+                : newmsg);
         } // if this.keepForResend - create a retryMessage
     }
     else if (stream && mylog) {
@@ -537,3 +451,4 @@ var yCatch = function (errorParm) {
     }
 };
 exports.yCatch = yCatch;
+//# sourceMappingURL=AserAHelpers.js.map

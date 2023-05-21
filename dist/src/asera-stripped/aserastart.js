@@ -22,19 +22,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var AserA = __importStar(require("./AserA"));
-var fs_1 = __importDefault(require("fs"));
-var package_json_1 = __importDefault(require("../../package.json"));
-var config_1 = __importDefault(require("./config"));
-var startapp = function () {
-    var log = null;
-    var logger = console;
-    var appName = config_1.default.get("name");
-    var appConfig = config_1.default.get("aseraconfig");
-    var appStreams = config_1.default.get("aseraappstreams");
-    var startOk = true;
-    var appStreamsExport;
-    var bc;
+const AserA = __importStar(require("./AserA"));
+const fs_1 = __importDefault(require("fs"));
+const package_json_1 = __importDefault(require("../../package.json"));
+const config_1 = __importDefault(require("./config"));
+const startapp = () => {
+    const log = null;
+    const logger = console;
+    const appName = config_1.default.get("name");
+    const appConfig = config_1.default.get("aseraconfig");
+    const appStreams = config_1.default.get("aseraappstreams");
+    let startOk = true;
+    let appStreamsExport;
+    let bc;
     if (!appName) {
         logger.error("Application name (env variable ASERAAPPL) must be given ");
         startOk = false;
@@ -50,13 +50,13 @@ var startapp = function () {
     if (startOk) {
         appStreamsExport = require(appStreams);
         if (!appStreamsExport) {
-            logger.error("Require on " + appStreams + " failed");
+            logger.error(`Require on ${appStreams} failed`);
             startOk = false;
         }
         else {
             bc = appStreamsExport.BusinessClasses;
             if (!bc) {
-                logger.error("Exported object BusinessClasses not found on " + appStreams);
+                logger.error(`Exported object BusinessClasses not found on ${appStreams}`);
                 startOk = false;
             }
         }
@@ -68,8 +68,8 @@ var startapp = function () {
     logger.info("Stream definition file : ", appConfig);
     logger.info("Application Streams : ", appStreams);
     function jsonfile(file) {
-        return new Promise(function (resolve, reject) {
-            fs_1.default.readFile(file, function (err, data) {
+        return new Promise((resolve, reject) => {
+            fs_1.default.readFile(file, (err, data) => {
                 if (err) {
                     return reject(err);
                 }
@@ -79,7 +79,7 @@ var startapp = function () {
     }
     function configurateserver() {
         Promise.all([jsonfile(appConfig)])
-            .then(function (data) {
+            .then(data => {
             AserA.start({
                 businessStreams: bc,
                 aseraDefinition: data[0],
@@ -88,8 +88,9 @@ var startapp = function () {
                 log: logger
             });
         })
-            .catch(function (err) { return logger.error(err); });
+            .catch(err => logger.error(err));
     }
     configurateserver();
 };
 exports.default = startapp;
+//# sourceMappingURL=aserastart.js.map

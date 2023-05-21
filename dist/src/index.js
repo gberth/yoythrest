@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // just deploy .
-var aserastart_1 = __importDefault(require("./asera-stripped/aserastart"));
+const aserastart_1 = __importDefault(require("./asera-stripped/aserastart"));
 console.log('Jada -------------------');
 aserastart_1.default();
+//# sourceMappingURL=index.js.map

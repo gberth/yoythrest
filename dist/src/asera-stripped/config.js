@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var convict_1 = __importDefault(require("convict"));
-var package_json_1 = __importDefault(require("../../package.json"));
+const convict_1 = __importDefault(require("convict"));
+const package_json_1 = __importDefault(require("../../package.json"));
 // Configuration schema
-var conf = convict_1.default({
+const conf = convict_1.default({
     env: {
         doc: "Applicaton environments",
         format: ["development", "production", "test"],
@@ -42,3 +42,4 @@ var conf = convict_1.default({
 // Validate all properties and export it
 conf.validate();
 exports.default = conf;
+//# sourceMappingURL=config.js.map

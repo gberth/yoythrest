@@ -4,13 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.message = void 0;
-var merge_1 = __importDefault(require("merge"));
-var underscore_1 = __importDefault(require("underscore"));
+const merge_1 = __importDefault(require("merge"));
+const underscore_1 = __importDefault(require("underscore"));
 /* eslint-disable no-use-before-define */
-var AserAHelpers_1 = require("./AserAHelpers");
-var AserAHelpers_2 = require("./AserAHelpers");
-var AserAMessage = /** @class */ (function () {
-    function AserAMessage(message, overrideMessageType) {
+const AserAHelpers_1 = require("./AserAHelpers");
+const AserAHelpers_2 = require("./AserAHelpers");
+class AserAMessage {
+    constructor(message, overrideMessageType) {
         // a message must contain message_data
         if (!message.message_data) {
             console.log(message);
@@ -32,51 +32,50 @@ var AserAMessage = /** @class */ (function () {
             this.message_data.request_data = {};
         }
     }
-    AserAMessage.prototype.identity = function () {
+    identity() {
         return this.identity_data.identity || null;
-    };
-    AserAMessage.prototype.owner = function () {
+    }
+    owner() {
         return this.identity_data.aOwner || null;
-    };
-    AserAMessage.prototype.message_id = function () {
+    }
+    message_id() {
         return this.message_data.message_id || null;
-    };
-    AserAMessage.prototype.type = function () {
+    }
+    type() {
         return this.message_data.type || this.message_data.message_type;
-    };
-    AserAMessage.prototype.message_payload = function () {
+    }
+    message_payload() {
         return this.payload;
-    };
-    AserAMessage.prototype.get_request_data = function () {
+    }
+    get_request_data() {
         return this.message_data.request_data || null;
-    };
-    AserAMessage.prototype.get_request_id = function () {
+    }
+    get_request_id() {
         return this.message_data.request_data ? (this.message_data.request_data.request_id || null) : null;
-    };
-    AserAMessage.prototype.get_request_stream = function () {
+    }
+    get_request_stream() {
         if (this.message_data.request_data && this.message_data.request_data.stream_id) {
             return this.message_data.request_data.stream_id;
         }
         else {
             return 'no_request_stream_id';
         }
-    };
-    AserAMessage.prototype.message_payloadElement = function (element) {
+    }
+    message_payloadElement(element) {
         if (underscore_1.default.isObject(this.payload)) {
             return underscore_1.default.propertyOf(this.payload)(element);
         }
         return null;
-    };
-    AserAMessage.prototype.stringyfy = function () {
+    }
+    stringyfy() {
         return JSON.stringify({
             message_data: this.message_data,
             identity_data: this.identity_data,
             payload: this.payload
         });
-    };
+    }
     // copy message data from this (mother) to input message
-    AserAMessage.prototype.createMessageWithThisAsMother = function (msg, newMsg) {
-        if (newMsg === void 0) { newMsg = false; }
+    createMessageWithThisAsMother(msg, newMsg = false) {
         msg.message_data.original_message_id = this.message_data.original_message_id
             ? this.message_data.original_message_id
             : this.message_data.message_id;
@@ -93,8 +92,8 @@ var AserAMessage = /** @class */ (function () {
         }
         msg.identity_data = this.identity_data;
         return msg;
-    };
-    AserAMessage.prototype.keepOldRequestIdAndSetNew = function (request_id, requestType) {
+    }
+    keepOldRequestIdAndSetNew(request_id, requestType) {
         if (this.message_data.request_data) {
             if (this.message_data.request_data.request_id &&
                 !this.message_data.request_data.request_id_trace) {
@@ -110,8 +109,8 @@ var AserAMessage = /** @class */ (function () {
             this.message_data.request_data = {};
         this.message_data.request_data.request_id = request_id;
         this.message_data.request_data.requestType = requestType;
-    };
-    AserAMessage.prototype.setRequestData = function (stream, request_id, requestType) {
+    }
+    setRequestData(stream, request_id, requestType) {
         if (!this.message_data.request_data) {
             // @ts-ignore
             this.message_data.request_data = {};
@@ -119,13 +118,11 @@ var AserAMessage = /** @class */ (function () {
         this.message_data.request_data.stream_id = stream.streamId;
         this.message_data.request_data.request_id = request_id;
         this.message_data.request_data.requestType = requestType;
-    };
-    return AserAMessage;
-}());
+    }
+}
 exports.default = AserAMessage;
 function message(msg_data) {
-    return function (_a) {
-        var message_data = _a.message_data, payload = _a.payload;
+    return function ({ message_data, payload }) {
         return new AserAMessage({
             message_data: merge_1.default.recursive(true, message_data, msg_data),
             identity_data: {},
@@ -134,3 +131,4 @@ function message(msg_data) {
     };
 }
 exports.message = message;
+//# sourceMappingURL=AserAMessage.js.map

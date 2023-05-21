@@ -282,7 +282,7 @@ export const createAck = function ({
   response,
   payload,
   error = false
-}: AckParameters) {
+}: AckParameters):any {
   // @ts-ignore
   // deprectaed
   const stream = this instanceof AserAStream ? this : null;
@@ -333,7 +333,7 @@ export const ack = function ({
   msg,
   response,
   error = false
-}: AckParameters) {
+}: AckParameters):any {
   // @ts-ignore
   const stream = this instanceof AserAStream ? this : null;
   if (!stream) return null;

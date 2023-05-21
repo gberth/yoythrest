@@ -1,64 +1,37 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var AserAStream_1 = __importDefault(require("../../AserAStream"));
-var AserAMessage_1 = __importDefault(require("../../AserAMessage"));
-var AserAHelpers_1 = require("../../AserAHelpers");
-var WebSocket = require("ws");
-var WebSocketServer = WebSocket.Server;
-var AserAWebSocketServerLight = /** @class */ (function (_super) {
-    __extends(AserAWebSocketServerLight, _super);
-    function AserAWebSocketServerLight(streamDef, outputStream, motherId) {
-        var _this_1 = _super.call(this, streamDef, outputStream, motherId) || this;
-        _this_1.handle_message = handle_message.bind(_this_1);
-        _this_1.connect = connect.bind(_this_1);
-        var port = process.env.PORT || process.env[_this_1.config.port] || _this_1.config.port;
-        _this_1.wss = new WebSocketServer({
+const AserAStream_1 = __importDefault(require("../../AserAStream"));
+const AserAMessage_1 = __importDefault(require("../../AserAMessage"));
+const AserAHelpers_1 = require("../../AserAHelpers");
+const WebSocket = require("ws");
+const WebSocketServer = WebSocket.Server;
+class AserAWebSocketServerLight extends AserAStream_1.default {
+    constructor(streamDef, outputStream, motherId) {
+        super(streamDef, outputStream, motherId);
+        this.handle_message = handle_message.bind(this);
+        this.connect = connect.bind(this);
+        let port = process.env.PORT || process.env[this.config.port] || this.config.port;
+        this.wss = new WebSocketServer({
             port: port
         });
-        _this_1.raw = _this_1.config.raw || false;
-        _this_1.raw_type = _this_1.config.raw_type || undefined;
-        _this_1.payload_only = _this_1.config.payload_only || false;
-        _this_1.log.info("listening on port: " + port);
-        _this_1.initialAserAData = null;
-        _this_1.connections = {};
-        _this_1.wsconnection = {};
-        _this_1.connectionsData = {};
-        _this_1.connectionct = 0;
-        _this_1.maxconnections = 0;
-        _this_1.requests = {};
-        var _this = _this_1;
-        _this_1.wss.broadcast = broadcast.bind(_this_1);
-        _this_1.wss.on("connection", _this_1.connect);
-        _this_1.on("data", function (msg) {
+        this.raw = this.config.raw || false;
+        this.raw_type = this.config.raw_type || undefined;
+        this.payload_only = this.config.payload_only || false;
+        this.log.info(`listening on port: ${port}`);
+        this.initialAserAData = null;
+        this.connections = {};
+        this.wsconnection = {};
+        this.connectionsData = {};
+        this.connectionct = 0;
+        this.maxconnections = 0;
+        this.requests = {};
+        const _this = this;
+        this.wss.broadcast = broadcast.bind(this);
+        this.wss.on("connection", this.connect);
+        this.on("data", function (msg) {
             try {
                 _this.handle_message(msg);
             }
@@ -69,23 +42,21 @@ var AserAWebSocketServerLight = /** @class */ (function (_super) {
                 });
             }
         });
-        _this_1.initiated = true;
-        _this_1.setStarted();
-        return _this_1;
+        this.initiated = true;
+        this.setStarted();
     }
-    return AserAWebSocketServerLight;
-}(AserAStream_1.default));
+}
 function connect(ws) {
     // @ts-ignore
-    var stream = this;
-    var connId = AserAHelpers_1.aId();
+    const stream = this;
+    const connId = AserAHelpers_1.aId();
     stream.connections[ws] = connId;
     stream.wsconnection[connId] = ws;
-    stream.log.info("connected websockets: " + connId);
+    stream.log.info(`connected websockets: ${connId}`);
     stream.connectionct += 1;
     stream.maxconnections = Math.max(stream.connectionct, stream.maxconnections);
     ws.on("message", function incoming(msg) {
-        var newmsg, reqdata;
+        let newmsg, reqdata;
         if (stream.raw) {
             newmsg = new AserAMessage_1.default({
                 message_data: {
@@ -99,7 +70,7 @@ function connect(ws) {
         }
         else {
             newmsg = new AserAMessage_1.default(JSON.parse(msg));
-            reqdata = __assign(__assign({}, newmsg.get_request_data()), { ws: ws });
+            reqdata = Object.assign(Object.assign({}, newmsg.get_request_data()), { ws: ws });
             newmsg.message_data.request_data.stream_id = stream.stream_id;
             if (!newmsg.message_data.request_data.request_id) {
                 newmsg.message_data.request_data.request_id = newmsg.message_id();
@@ -116,7 +87,7 @@ function connect(ws) {
 }
 function broadcast(data) {
     // @ts-ignore
-    var stream = this;
+    const stream = this;
     stream.wss.clients.forEach(function each(client) {
         /* global WebSocket */
         if (client.readyState === WebSocket.OPEN) {
@@ -127,13 +98,13 @@ function broadcast(data) {
 function handle_message(msg) {
     var _a, _b, _c;
     // @ts-ignore
-    var stream = this;
+    const stream = this;
     // handle ack
     if (msg.type() === 'ACK') {
         // @ts-ignore
-        var reqdata = stream.requests[msg.get_request_data().request_id];
+        let reqdata = stream.requests[msg.get_request_data().request_id];
         // write back original request data
-        msg.message_data.request_data = __assign({}, reqdata);
+        msg.message_data.request_data = Object.assign({}, reqdata);
         if (reqdata.ws.readyState === WebSocket.OPEN) {
             reqdata.ws.send(JSON.stringify(msg));
         }
@@ -151,3 +122,4 @@ function handle_message(msg) {
     }
 }
 exports.default = AserAWebSocketServerLight;
+//# sourceMappingURL=AserAWebSocketServerLight.js.map

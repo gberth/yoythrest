@@ -1,46 +1,30 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var AserAStream_1 = __importDefault(require("../../AserAStream"));
-var AserAMessage_1 = __importDefault(require("../../AserAMessage"));
-var WebSocket = require("ws");
-var WebSocketServer = WebSocket.Server;
-var AserAWebSocketClientLight = /** @class */ (function (_super) {
-    __extends(AserAWebSocketClientLight, _super);
-    function AserAWebSocketClientLight(streamDef, outputStream, motherId) {
-        var _this_1 = _super.call(this, streamDef, outputStream, motherId) || this;
-        _this_1.handleWsMessage = handleWsMessage.bind(_this_1);
-        _this_1.sendbackMessage = sendbackMessage.bind(_this_1);
-        _this_1.sendPingOrTryLogin = sendPingOrTryLogin.bind(_this_1);
-        _this_1.initiateConnection = initiateConnection.bind(_this_1);
-        _this_1.connectionOpen = false;
-        _this_1.requests = {};
-        if (_this_1.config.pingmessage) {
-            if (!_this_1.config.pingmessage.message_data.creator) {
-                _this_1.config.pingmessage.message_data.creator = _this_1.streamIdentifier;
+const AserAStream_1 = __importDefault(require("../../AserAStream"));
+const AserAMessage_1 = __importDefault(require("../../AserAMessage"));
+const WebSocket = require("ws");
+const WebSocketServer = WebSocket.Server;
+class AserAWebSocketClientLight extends AserAStream_1.default {
+    constructor(streamDef, outputStream, motherId) {
+        super(streamDef, outputStream, motherId);
+        this.handleWsMessage = handleWsMessage.bind(this);
+        this.sendbackMessage = sendbackMessage.bind(this);
+        this.sendPingOrTryLogin = sendPingOrTryLogin.bind(this);
+        this.initiateConnection = initiateConnection.bind(this);
+        this.connectionOpen = false;
+        this.requests = {};
+        if (this.config.pingmessage) {
+            if (!this.config.pingmessage.message_data.creator) {
+                this.config.pingmessage.message_data.creator = this.streamIdentifier;
             }
-            _this_1.pingmsg = JSON.stringify(_this_1.config.pingmessage);
+            this.pingmsg = JSON.stringify(this.config.pingmessage);
         }
-        var _this = _this_1;
-        _this_1.sendPingOrTryLogin();
-        _this_1.on("data", function (msg) {
+        const _this = this;
+        this.sendPingOrTryLogin();
+        this.on("data", function (msg) {
             try {
                 _this.sendbackMessage(msg);
             }
@@ -48,28 +32,26 @@ var AserAWebSocketClientLight = /** @class */ (function (_super) {
                 _this.connectionOpen = false;
             }
         });
-        _this_1.on("ping", function () {
+        this.on("ping", function () {
             _this.sendPingOrTryLogin();
         });
-        _this_1.initiated = true;
-        _this_1.setStarted();
-        return _this_1;
+        this.initiated = true;
+        this.setStarted();
     }
-    return AserAWebSocketClientLight;
-}(AserAStream_1.default));
+}
 function initiateConnection() {
     // @ts-ignore
-    var stream = this;
+    const stream = this;
     try {
         stream.wss = new WebSocket(stream.config.wsadress);
-        stream.wss.on("open", function () {
+        stream.wss.on("open", () => {
             stream.connectionOpen = true;
             if (stream.config.openmessage) {
                 stream.wss.send(JSON.stringify(stream.config.openmessage));
             }
         });
-        stream.wss.on("message", function (msgin) {
-            var msg;
+        stream.wss.on("message", (msgin) => {
+            let msg;
             try {
                 msg = new AserAMessage_1.default(JSON.parse(msgin));
                 stream.handleWsMessage(msg);
@@ -81,11 +63,11 @@ function initiateConnection() {
                 });
             }
         });
-        stream.wss.on("close", function () {
+        stream.wss.on("close", () => {
             stream.log.info("connection closed");
             stream.connectionOpen = false;
         });
-        stream.wss.on("error", function (err) {
+        stream.wss.on("error", (err) => {
             stream.log.error("ws error");
             stream.log.error(err);
             stream.connectionOpen = false;
@@ -100,7 +82,7 @@ function initiateConnection() {
 }
 function sendPingOrTryLogin() {
     // @ts-ignore
-    var stream = this;
+    const stream = this;
     stream.log.info("ping - open? " + stream.connectionOpen.toString());
     if (stream.connectionOpen) {
         if (stream.pingmsg) {
@@ -126,7 +108,7 @@ function sendPingOrTryLogin() {
 function handleWsMessage(msg) {
     var _a;
     // @ts-ignore
-    var stream = this;
+    const stream = this;
     console.log('receive');
     console.dir(msg);
     try {
@@ -152,7 +134,7 @@ function handleWsMessage(msg) {
 function sendbackMessage(msg) {
     var _a;
     // @ts-ignore
-    var stream = this;
+    const stream = this;
     console.log('send');
     console.dir(msg);
     try {
@@ -174,3 +156,4 @@ function sendbackMessage(msg) {
     }
 }
 exports.default = AserAWebSocketClientLight;
+//# sourceMappingURL=AserAWebSocketClientLight.js.map

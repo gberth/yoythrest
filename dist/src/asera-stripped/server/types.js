@@ -18,3 +18,4 @@ var LOGLEVELS;
     LOGLEVELS[LOGLEVELS["error"] = 50] = "error";
     LOGLEVELS[LOGLEVELS["fatal"] = 60] = "fatal";
 })(LOGLEVELS = exports.LOGLEVELS || (exports.LOGLEVELS = {}));
+//# sourceMappingURL=types.js.map

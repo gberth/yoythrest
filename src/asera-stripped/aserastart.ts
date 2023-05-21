@@ -5,7 +5,7 @@ import config from "./config";
 
 
 const startapp = () => {
-  const log = null;
+  const log:any = null;
   const logger = console;
 
   const appName = config.get("name");

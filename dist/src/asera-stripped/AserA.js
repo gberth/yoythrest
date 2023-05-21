@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.start = void 0;
-var index_1 = require("./index");
-var AserAHelpers_1 = require("./server/AserAHelpers");
-var start = function (_a) {
-    var aseraDefinition = _a.aseraDefinition, businessStreams = _a.businessStreams, serverId = _a.serverId, testStreams = _a.testStreams, version = _a.version, log = _a.log;
-    var findStream = function (classString) {
+const index_1 = require("./index");
+const AserAHelpers_1 = require("./server/AserAHelpers");
+const start = function ({ aseraDefinition, businessStreams, serverId, testStreams, version, log }) {
+    const findStream = (classString) => {
         if (businessStreams && businessStreams[classString]) {
             return businessStreams[classString];
         }
@@ -22,7 +21,7 @@ var start = function (_a) {
             process.exit(12);
         }
     };
-    var setStream = function (stream) {
+    const setStream = (stream) => {
         stream.streamClassId = stream.streamClassId || stream.streamClass;
         stream.streamClass = findStream(stream.streamClassId);
         if (stream.streamConfig.converterStream) {
@@ -31,7 +30,7 @@ var start = function (_a) {
             stream.streamConfig.converterStream = findStream(stream.streamConfig.converterStream.streamClass);
         }
         if (stream.streamConfig.streams) {
-            stream.streamConfig.streams.map(function (streamDef, j) {
+            stream.streamConfig.streams.map((streamDef, j) => {
                 setStream(streamDef);
             });
         }
@@ -50,3 +49,4 @@ var start = function (_a) {
     return new aseraDefinition.stream.streamClass(aseraDefinition.stream, null, null);
 };
 exports.start = start;
+//# sourceMappingURL=AserA.js.map
