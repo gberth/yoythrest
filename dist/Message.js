@@ -25,7 +25,7 @@ class Message {
         }
         if (!this.message_data.message_id ||
             this.message_data.message_id === "generate") {
-            this.message_data.message_id = helpers_1.aId();
+            this.message_data.message_id = helpers_1.yId();
         }
         if (!this.message_data.request_data) {
             this.message_data.request_data = {};
@@ -66,7 +66,7 @@ class Message {
         }
         return null;
     }
-    stringyfy() {
+    stringify() {
         return JSON.stringify({
             message_data: this.message_data,
             identity_data: this.identity_data,

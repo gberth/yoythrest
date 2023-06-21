@@ -170,7 +170,7 @@ export const readCertificates = (ssl: SslOptions): SslOptions => {
   return retSsl;
 };
 
-export const aId = (): string => {
+export const yId = (): string => {
   return uuidv4().toString();
 };
 

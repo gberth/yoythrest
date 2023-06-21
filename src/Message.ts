@@ -5,7 +5,7 @@ import _ from "underscore";
 
 /* eslint-disable no-use-before-define */
 
-import { aId as aid } from "./helpers";
+import { yId as yid } from "./helpers";
 
 import { ts } from "./helpers";
 
@@ -43,7 +43,7 @@ export default class Message {
       !this.message_data.message_id ||
       this.message_data.message_id === "generate"
     ) {
-      this.message_data.message_id = aid();
+      this.message_data.message_id = yid();
     }
     if (!this.message_data.request_data) {
       this.message_data.request_data = {} as RequestData;
@@ -94,7 +94,7 @@ export default class Message {
     return null;
   }
 
-  stringyfy() {
+  stringify() {
     return JSON.stringify({
       message_data: this.message_data,
       identity_data: this.identity_data,

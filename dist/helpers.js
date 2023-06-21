@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.yCatch = exports.aItem = exports.ts = exports.listDirectory = exports.returnFileContent = exports.delay = exports.isAsync = exports.isError = exports.isResponse = exports.isAck = exports.ack = exports.createAck = exports.aId = exports.readCertificates = exports.awaitcondition = exports.setLogOveride = void 0;
+exports.yCatch = exports.aItem = exports.ts = exports.listDirectory = exports.returnFileContent = exports.delay = exports.isAsync = exports.isError = exports.isResponse = exports.isAck = exports.ack = exports.createAck = exports.yId = exports.readCertificates = exports.awaitcondition = exports.setLogOveride = void 0;
 const Message_1 = __importDefault(require("./Message"));
 const types_1 = require("./types");
 const merge_1 = __importDefault(require("merge"));
@@ -144,10 +144,10 @@ const readCertificates = (ssl) => {
     return retSsl;
 };
 exports.readCertificates = readCertificates;
-const aId = () => {
+const yId = () => {
     return uuid_1.v4().toString();
 };
-exports.aId = aId;
+exports.yId = yId;
 const createAck = function ({ msg, type, response, payload, error = false }) {
     // @ts-ignore
     // deprectaed
