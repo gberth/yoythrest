@@ -25,8 +25,9 @@ class FromWs extends stream_1.Transform {
             try {
                 msg = new Message_1.default(JSON.parse(msgin));
                 const reqid = msg.get_request_id();
-                if (stream.requests.reqid) {
-                    stream.requests.reqid.res.send(msgin);
+                if (stream.requests[reqid]) {
+                    console.log("jada");
+                    stream.requests[reqid].res.send(msgin);
                 }
             }
             catch (error) {
@@ -56,6 +57,10 @@ class ToWs extends stream_1.Transform {
         });
     }
 }
+stream_1.Transform.prototype._transform = function (data, encoding, callback) {
+    this.push(data);
+    callback();
+};
 let fromws = new FromWs();
 let tows = new ToWs();
 function initiateConnection() {
@@ -65,16 +70,19 @@ function initiateConnection() {
             stream.connectionOpen = true;
         });
         wss.on("message", (msgin) => {
+            console.log("From server ----------", msgin);
             fromws.write(msgin);
         });
         wss.on("close", () => {
             console.error("connection closed");
             stream.connectionOpen = false;
+            initiateConnection();
         });
         wss.on("error", (err) => {
             console.error("ws error");
             console.error(err);
             stream.connectionOpen = false;
+            initiateConnection();
         });
         console.log("WS sucessfullyy established");
     }
@@ -97,9 +105,10 @@ app.get('/ping', (_req, res) => {
 app.post('/yts', (_req, res) => {
     console.dir(_req.body);
     try {
-        const msg = new Message_1.default(JSON.parse(_req.body));
+        const msg = new Message_1.default(_req.body);
         msg.setRequestData("yoythrest", helpers_1.yId(), "send");
         stream.requests[msg.get_request_id()] = { req: _req, res: res };
+        console.dir(msg);
         tows.write(msg);
     }
     catch (error) {
