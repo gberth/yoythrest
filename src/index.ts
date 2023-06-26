@@ -7,13 +7,15 @@ const WebSocket = require("ws");
 type stream_attr = {
   connections: {[key: string]: any} 
   requests: {[key: string]: {type: string, req: Request, res: Response}};
+  timeoutstarted: boolean
 };
 type StreamDef = {
   wsaddress: string
 }
 let stream:stream_attr = {
   connections:{},
-  requests: {}
+  requests: {},
+  timeoutstarted: false
 }
 
 let wss:any = null
@@ -35,18 +37,23 @@ class FromWs extends Stream {
         const reqid = msg.get_request_id()
         if (stream.requests[reqid]) {
           console.log("jada")
+          if (stream.requests[reqid].type === "ping") {
+            console.log("ping ok")
+          } else {
   // @ts-ignore    
           if (msg.message_payload().data) {
   // @ts-ignore
             console.log(msg.message_payload().data.length)
   // @ts-ignore
-            const imgBase64 = msg.message_payload().data.toString("base64");
-            console.log(imgBase64.length)
-            let ret = "<div> <img src={data:image/jpg;base64," + imgBase64 + "}/></div>"
+            var u8 = new Uint8Array(msg.message_payload().data);
+            var b64 = Buffer.from(u8).toString('base64');
+            console.log(b64.length)
+            let ret = "<div> <img src={data:image/jpg;base64," + b64 + "}/></div>"
             stream.requests[reqid].res.send(ret)
           } else {
             stream.requests[reqid].res.send(msgin)
           }
+        }
           delete stream.requests[reqid]       
         }
       }
@@ -81,9 +88,9 @@ class ToWs extends Stream {
         if (!stream.connections[wsaddress].connectionOpen) {
           setTimeout(
           send_ws(stream.connections[wsaddress].ws, msgin), 1000);
-        } else {
+        } 
         stream.connections[wsaddress].ws.send(msgin.stringify())
-        }
+        
       }
       catch (error) {
         console.log(error)
@@ -112,6 +119,10 @@ function initiateConnection(wsaddress:string): WebSocket {
         tows: new ToWs(wsaddress)
       }
     }
+    if (!stream.timeoutstarted) {
+      stream.timeoutstarted = true
+      start_ping()
+    }
     stream.connections[wsaddress].ws = wss    
     const connection = stream.connections[wsaddress]
     wss.on("open", () => {
@@ -119,7 +130,7 @@ function initiateConnection(wsaddress:string): WebSocket {
       connection.connectionOpen = true;
     });
     wss.on("message", (msgin: string) => {
-      console.log("From server ----------", msgin)
+      console.log("From server ----------", msgin.substring(0,200))
       connection.fromws.write(msgin)
     })
     wss.on("close", () => {
@@ -140,6 +151,21 @@ function initiateConnection(wsaddress:string): WebSocket {
     console.error(error);
   }
   return wss
+}
+
+function start_ping() {
+    setInterval(
+    send_ping(), 30000);
+}
+
+function send_ping() {
+  return () => {
+    Object.keys(stream.connections).forEach((connection) => {
+      const pingmsg = new Message({message_data: {type: "ping", message_id: "generate", request_data: {}}, identity_data: {}, payload: {}})
+        stream.requests[pingmsg.get_request_id()] = {type: "ping", req: null, res: null}
+      stream.connections[connection].tows.write(pingmsg)
+    })
+  }
 }
 
 const app = express()
