@@ -9,17 +9,19 @@ const Message_1 = __importDefault(require("./Message"));
 const helpers_1 = require("./helpers");
 const WebSocket = require("ws");
 let stream = {
-    connectionOpen: false,
+    connections: {},
     requests: {}
 };
 let wss = null;
 class FromWs extends stream_1.Transform {
-    constructor() {
+    constructor(wsaddress) {
         super({
             readableObjectMode: true,
             writableObjectMode: true
         });
         const _this = this;
+        // @ts-ignore    
+        _this.wsaddress = wsaddress;
         _this.on("data", (msgin) => {
             let msg;
             try {
@@ -27,7 +29,20 @@ class FromWs extends stream_1.Transform {
                 const reqid = msg.get_request_id();
                 if (stream.requests[reqid]) {
                     console.log("jada");
-                    stream.requests[reqid].res.send(msgin);
+                    // @ts-ignore    
+                    if (msg.message_payload().data) {
+                        // @ts-ignore
+                        console.log(msg.message_payload().data.length);
+                        // @ts-ignore
+                        const imgBase64 = msg.message_payload().data.toString("base64");
+                        console.log(imgBase64.length);
+                        let ret = "<div> <img src={data:image/jpg;base64," + imgBase64 + "}/></div>";
+                        stream.requests[reqid].res.send(ret);
+                    }
+                    else {
+                        stream.requests[reqid].res.send(msgin);
+                    }
+                    delete stream.requests[reqid];
                 }
             }
             catch (error) {
@@ -36,20 +51,31 @@ class FromWs extends stream_1.Transform {
         });
     }
 }
+function send_ws(ws, msg) {
+    return () => {
+        console.log("sending");
+        ws.send(msg.stringify());
+    };
+}
 class ToWs extends stream_1.Transform {
-    constructor() {
+    constructor(wsaddress) {
         super({
             readableObjectMode: true,
             writableObjectMode: true
         });
         const _this = this;
+        // @ts-ignore    
+        _this.wsaddress = wsaddress;
         _this.on("data", (msgin) => {
             let msg;
-            if (!stream.connectionOpen) {
-                initiateConnection();
-            }
             try {
-                wss.send(msgin.stringify());
+                console.log(".................to server ", msgin);
+                if (!stream.connections[wsaddress].connectionOpen) {
+                    setTimeout(send_ws(stream.connections[wsaddress].ws, msgin), 1000);
+                }
+                else {
+                    stream.connections[wsaddress].ws.send(msgin.stringify());
+                }
             }
             catch (error) {
                 console.log(error);
@@ -61,40 +87,50 @@ stream_1.Transform.prototype._transform = function (data, encoding, callback) {
     this.push(data);
     callback();
 };
-let fromws = new FromWs();
-let tows = new ToWs();
-function initiateConnection() {
+function initiateConnection(wsaddress) {
+    console.log("initiate for " + wsaddress);
     try {
-        wss = new WebSocket(process.env.WSADDRESS);
+        wss = new WebSocket("wss:\\" + wsaddress);
+        if (!stream.connections[wsaddress]) {
+            stream.connections[wsaddress] = {
+                connectionOpen: false,
+                ws: wss,
+                fromws: new FromWs(wsaddress),
+                tows: new ToWs(wsaddress)
+            };
+        }
+        stream.connections[wsaddress].ws = wss;
+        const connection = stream.connections[wsaddress];
         wss.on("open", () => {
-            stream.connectionOpen = true;
+            console.log("connection open " + wsaddress);
+            connection.connectionOpen = true;
         });
         wss.on("message", (msgin) => {
             console.log("From server ----------", msgin);
-            fromws.write(msgin);
+            connection.fromws.write(msgin);
         });
         wss.on("close", () => {
             console.error("connection closed");
-            stream.connectionOpen = false;
-            initiateConnection();
+            connection.connectionOpen = false;
+            initiateConnection(wsaddress);
         });
         wss.on("error", (err) => {
             console.error("ws error");
             console.error(err);
-            stream.connectionOpen = false;
-            initiateConnection();
+            connection.connectionOpen = false;
+            initiateConnection(wsaddress);
         });
         console.log("WS sucessfullyy established");
     }
     catch (error) {
-        stream.connectionOpen = false;
         console.error("WS not established");
+        initiateConnection(wsaddress);
         console.error(error);
     }
+    return wss;
 }
 const app = express_1.default();
 const port = process.env.PORT || 8080;
-initiateConnection();
 app.use(express_1.default.json());
 app.get('/', (_req, res) => {
     return res.send('Express Typescript on Vercel');
@@ -107,13 +143,43 @@ app.post('/yts', (_req, res) => {
     try {
         const msg = new Message_1.default(_req.body);
         msg.setRequestData("yoythrest", helpers_1.yId(), "send");
-        stream.requests[msg.get_request_id()] = { req: _req, res: res };
+        stream.requests[msg.get_request_id()] = { type: msg.type(), req: _req, res: res };
         console.dir(msg);
-        tows.write(msg);
     }
     catch (error) {
         console.log(error);
     }
+});
+app.get('/termux', (_req, res) => {
+    console.dir(_req.query);
+    if (!_req.query.ws) {
+        return res.send('Missing attribute ws');
+    }
+    if (!_req.query.type) {
+        return res.send('Missing attribute type');
+    }
+    if (!_req.query.user) {
+        return res.send('Missing attribute type');
+    }
+    if (!stream.connections[_req.query.ws]) {
+        initiateConnection(_req.query.ws);
+    }
+    let newmsg = new Message_1.default({
+        message_data: {
+            message_id: "generate",
+            type: _req.query.type,
+            request_data: {
+                user: _req.query.user
+            }
+        },
+        identity_data: {
+            identity: "g37cdcd0-ae54-11e7-b461-eb2f2858d486"
+        },
+        payload: {}
+    });
+    newmsg.setRequestData("yoythrest", helpers_1.yId(), "send");
+    stream.requests[newmsg.get_request_id()] = { type: _req.query.type, req: _req, res: res };
+    stream.connections[_req.query.ws].tows.write(newmsg);
 });
 app.listen(port, () => {
     return console.log(`Server is listening on ${port}`);
