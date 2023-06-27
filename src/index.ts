@@ -3,6 +3,26 @@ import { Transform as Stream } from "stream";
 import Message from "./Message"
 import { yId } from "./helpers"
 
+const EventEmitter = require('events');
+
+const connection_event = new EventEmitter();
+
+async function send_conn(wsaddress: string) {
+    if (!stream.connections[wsaddress].connectionOpen) {
+      console.log("wait for open", wsaddress)
+      await new Promise(resolve => connection_event.once(wsaddress, resolve));
+      console.log("waited for open", stream.connections[wsaddress].connectionOpen)
+    }
+      if (stream.connections[wsaddress].connectionOpen) {
+        stream.connections[wsaddress].send_msgs.forEach((msg:Message) => {
+          stream.connections[wsaddress].ws.send(msg.stringify())
+        })
+        stream.connections[wsaddress].send_msgs = []
+      } else {
+        console.error("no connection", wsaddress)
+      }
+}
+
 const WebSocket = require("ws");
 type stream_attr = {
   connections: {[key: string]: any} 
@@ -45,11 +65,11 @@ class FromWs extends Stream {
   // @ts-ignore
             console.log(msg.message_payload().data.length)
   // @ts-ignore
-            var u8 = new Uint8Array(msg.message_payload().data);
-            var b64 = Buffer.from(u8).toString('base64');
-            console.log(b64.length)
-            let ret = "<div> <img src={data:image/jpg;base64," + b64 + "}/></div>"
-            stream.requests[reqid].res.send(ret)
+            let res = stream.requests[reqid].res
+  // @ts-ignore
+            let data = msg.message_payload().data as ArrayBuffer
+            res.type("image/jpg")
+            res.send(Buffer.from(data))
           } else {
             stream.requests[reqid].res.send(msgin)
           }
@@ -63,17 +83,6 @@ class FromWs extends Stream {
     });
 }
 }
-
-function send_ws(ws:WebSocket, msg:Message):Function {
-  return () => {
-    console.log("sending")
-    ws.send(msg.stringify())
-  }}
-
-function wait_for_ws(open:boolean, ct:number):Function {
-  return () => {
-    console.log("waiting for websocket open?=", open, ct)
-  }}
 
 class ToWs extends Stream {
   constructor(wsaddress:string
@@ -89,19 +98,8 @@ class ToWs extends Stream {
       let msg;
       try {
         console.log(".................to server open=", stream.connections[wsaddress].connectionOpen, msgin)
-        let ct = 0 
-        if (!stream.connections[wsaddress].connectionOpen) {
-          while (!stream.connections[wsaddress].connectionOpen && ct < 10) {
-            ct += 1
-            setTimeout(
-            wait_for_ws(stream.connections[wsaddress].connectionOpen, ct), 1000);
-          }
-        } 
-        if (stream.connections[wsaddress].connectionOpen) {
-          send_ws(stream.connections[wsaddress].ws, msgin)()
-        } else {
-          console.error("No connection")
-        }
+        stream.connections[wsaddress].send_msgs.push(msgin)
+        send_conn(wsaddress)
       }
       catch (error) {
         console.log(error)
@@ -127,7 +125,8 @@ function initiateConnection(wsaddress:string): WebSocket {
         connectionOpen: false,
         ws: wss,
         fromws: new FromWs(wsaddress),
-        tows: new ToWs(wsaddress)
+        tows: new ToWs(wsaddress),
+        send_msgs: []
       }
     }
     if (!stream.timeoutstarted) {
@@ -139,6 +138,7 @@ function initiateConnection(wsaddress:string): WebSocket {
     wss.on("open", () => {
       console.log("connection open " + wsaddress)
       connection.connectionOpen = true;
+      connection_event.emit(wsaddress);
     });
     wss.on("message", (msgin: string) => {
       console.log("From server ----------", msgin.substring(0,2000))
@@ -147,18 +147,21 @@ function initiateConnection(wsaddress:string): WebSocket {
     wss.on("close", () => {
       console.error("connection closed");
       connection.connectionOpen = false;
+      connection_event.emit(wsaddress);
       initiateConnection(wsaddress)
     });
     wss.on("error", (err: any) => {
       console.error("ws error");
       console.error(err);
       connection.connectionOpen = false;
+      connection_event.emit(wsaddress);
       initiateConnection(wsaddress)
       });
     console.log("WS sucessfullyy established");
   } catch (error) {
     console.error("WS not established");
     initiateConnection(wsaddress)
+    connection_event.emit(wsaddress);
     console.error(error);
   }
   return wss
