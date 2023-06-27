@@ -64,6 +64,11 @@ function send_ws(ws, msg) {
         ws.send(msg.stringify());
     };
 }
+function wait_for_ws(open, ct) {
+    return () => {
+        console.log("waiting for websocket open?=", open, ct);
+    };
+}
 class ToWs extends stream_1.Transform {
     constructor(wsaddress) {
         super({
@@ -76,11 +81,20 @@ class ToWs extends stream_1.Transform {
         _this.on("data", (msgin) => {
             let msg;
             try {
-                console.log(".................to server ", msgin);
+                console.log(".................to server open=", stream.connections[wsaddress].connectionOpen, msgin);
+                let ct = 0;
                 if (!stream.connections[wsaddress].connectionOpen) {
-                    setTimeout(send_ws(stream.connections[wsaddress].ws, msgin), 1000);
+                    while (!stream.connections[wsaddress].connectionOpen && ct < 10) {
+                        ct += 1;
+                        setTimeout(wait_for_ws(stream.connections[wsaddress].connectionOpen, ct), 1000);
+                    }
                 }
-                stream.connections[wsaddress].ws.send(msgin.stringify());
+                if (stream.connections[wsaddress].connectionOpen) {
+                    send_ws(stream.connections[wsaddress].ws, msgin)();
+                }
+                else {
+                    console.error("No connection");
+                }
             }
             catch (error) {
                 console.log(error);
@@ -115,7 +129,7 @@ function initiateConnection(wsaddress) {
             connection.connectionOpen = true;
         });
         wss.on("message", (msgin) => {
-            console.log("From server ----------", msgin.substring(0, 200));
+            console.log("From server ----------", msgin.substring(0, 2000));
             connection.fromws.write(msgin);
         });
         wss.on("close", () => {
