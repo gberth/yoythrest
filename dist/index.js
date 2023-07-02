@@ -64,13 +64,11 @@ class FromWs extends stream_1.Transform {
                     }
                     else {
                         // @ts-ignore    
-                        if (msg.message_payload().data) {
-                            // @ts-ignore
-                            console.log(msg.message_payload().data.length);
+                        if (msg.message_payload().data || msg.message_payload().photo) {
                             // @ts-ignore
                             let res = stream.requests[reqid].res;
                             // @ts-ignore
-                            let data = msg.message_payload().data;
+                            let data = msg.message_payload().data || msg.message_payload().photo;
                             res.type("image/jpg");
                             res.send(Buffer.from(data));
                         }
