@@ -220,7 +220,7 @@ app.get('/termux', (_req, res) => {
         identity_data: {
             identity: "g37cdcd0-ae54-11e7-b461-eb2f2858d486"
         },
-        payload: {}
+        payload: Object.assign({}, _req.query)
     });
     newmsg.setRequestData("yoythrest", helpers_1.yId(), "send");
     stream.requests[newmsg.get_request_id()] = { type: _req.query.type, req: _req, res: res };

@@ -234,7 +234,7 @@ app.get('/termux', (_req: Request, res: Response) => {
    identity_data:{
       identity:"g37cdcd0-ae54-11e7-b461-eb2f2858d486"
    },
-   payload: {}
+   payload: {..._req.query}
   })
 
         newmsg.setRequestData("yoythrest", yId(), "send")
