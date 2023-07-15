@@ -16,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const stream_1 = require("stream");
 const Message_1 = __importDefault(require("./Message"));
 const helpers_1 = require("./helpers");
+const { unzip } = require('node:zlib');
 const EventEmitter = require('events');
 const connection_event = new EventEmitter();
 function send_conn(wsaddress) {
@@ -56,7 +57,9 @@ class FromWs extends stream_1.Transform {
             let msg;
             try {
                 msg = new Message_1.default(JSON.parse(msgin));
+                let result;
                 const reqid = msg.get_request_id();
+                let res = stream.requests[reqid].res;
                 if (stream.requests[reqid]) {
                     console.log("jada");
                     if (stream.requests[reqid].type === "ping") {
@@ -64,19 +67,22 @@ class FromWs extends stream_1.Transform {
                     }
                     else {
                         // @ts-ignore    
-                        if (msg.message_payload().data || msg.message_payload().photo) {
-                            // @ts-ignore
-                            let res = stream.requests[reqid].res;
-                            // @ts-ignore
-                            let data = msg.message_payload().data || msg.message_payload().photo;
-                            res.type("image/jpg");
-                            res.send(Buffer.from(data));
+                        if (msg.message_payload().photo) {
+                            console.dir(msg.message_payload().camera_status);
+                            const newbuffer = Buffer.from(msg.message_payload().photo, 'base64');
+                            unzip(newbuffer, (err, buffer) => {
+                                if (err) {
+                                    console.error('An error occurred:', err);
+                                    return;
+                                }
+                                const newjson = JSON.parse(buffer);
+                                result = Buffer.from(newjson);
+                                res.type("image/jpg");
+                                res.send(result);
+                            });
                         }
-                        else {
-                            stream.requests[reqid].res.send(msgin);
-                        }
+                        delete stream.requests[reqid];
                     }
-                    delete stream.requests[reqid];
                 }
             }
             catch (error) {
@@ -136,7 +142,7 @@ function initiateConnection(wsaddress) {
             connection_event.emit(wsaddress);
         });
         wss.on("message", (msgin) => {
-            console.log("From server ----------", msgin.substring(0, 2000));
+            console.log("From server ----------", msgin.length, msgin.substring(0, 2000));
             connection.fromws.write(msgin);
         });
         wss.on("close", () => {
@@ -203,8 +209,8 @@ app.get('/termux', (_req, res) => {
     if (!_req.query.type) {
         return res.send('Missing attribute type');
     }
-    if (!_req.query.user) {
-        return res.send('Missing attribute type');
+    if (!_req.query.server) {
+        return res.send('Missing attribute server');
     }
     if (!stream.connections[_req.query.ws]) {
         initiateConnection(_req.query.ws);
@@ -214,7 +220,8 @@ app.get('/termux', (_req, res) => {
             message_id: "generate",
             type: _req.query.type,
             request_data: {
-                user: _req.query.user
+                server: _req.query.server,
+                stream_id: "yoythrest",
             }
         },
         identity_data: {

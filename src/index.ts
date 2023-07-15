@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express'
 import { Transform as Stream } from "stream";
 import Message from "./Message"
 import { yId } from "./helpers"
+const { unzip } = require('node:zlib');
+
 
 const EventEmitter = require('events');
 
@@ -50,30 +52,38 @@ class FromWs extends Stream {
     // @ts-ignore    
     _this.wsaddress = wsaddress
     _this.on("data", (msgin: string) => {
-      let msg;
+      let msg:any;
 
       try {
         msg = new Message(JSON.parse(msgin));
+        let result
         const reqid = msg.get_request_id()
+        let res = stream.requests[reqid].res
+  
         if (stream.requests[reqid]) {
           console.log("jada")
           if (stream.requests[reqid].type === "ping") {
             console.log("ping ok")
           } else {
   // @ts-ignore    
-          if (msg.message_payload().data || msg.message_payload().photo) {
-  // @ts-ignore
-            let res = stream.requests[reqid].res
-  // @ts-ignore
-            let data = msg.message_payload().data as ArrayBuffer || msg.message_payload().photo as ArrayBuffer
-            res.type("image/jpg")
-            res.send(Buffer.from(data))
-          } else {
-            stream.requests[reqid].res.send(msgin)
-          }
-        }
+          if (msg.message_payload().photo) {
+            console.dir(msg.message_payload().camera_status)
+              const newbuffer = Buffer.from(msg.message_payload().photo as string, 'base64');
+              unzip(newbuffer, (err:any, buffer:any) => {
+                if (err) {
+                  console.error('An error occurred:', err);
+                  return;
+                }
+                const newjson = JSON.parse(buffer)
+                result = Buffer.from(newjson)
+              res.type("image/jpg")
+              res.send(result)
+
+              })
+            }
           delete stream.requests[reqid]       
         }
+      }
       }
       catch (error) {
         console.log(error)
@@ -139,7 +149,7 @@ function initiateConnection(wsaddress:string): WebSocket {
       connection_event.emit(wsaddress);
     });
     wss.on("message", (msgin: string) => {
-      console.log("From server ----------", msgin.substring(0,2000))
+      console.log("From server ----------", msgin.length, msgin.substring(0,2000))
       connection.fromws.write(msgin)
     })
     wss.on("close", () => {
@@ -216,8 +226,8 @@ app.get('/termux', (_req: Request, res: Response) => {
     if (!_req.query.type) {
         return res.send('Missing attribute type')
     }
-    if (!_req.query.user) {
-        return res.send('Missing attribute type')
+    if (!_req.query.server) {
+        return res.send('Missing attribute server')
     }
 
     if (!stream.connections[_req.query.ws as string]) {
@@ -228,7 +238,8 @@ app.get('/termux', (_req: Request, res: Response) => {
         message_id: "generate",
         type: _req.query.type as string,
         request_data: {
-          user: _req.query.user as string
+          server: _req.query.server as string,
+          stream_id: "yoythrest",
         }
       },
    identity_data:{
