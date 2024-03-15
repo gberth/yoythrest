@@ -24,6 +24,7 @@ let msg_waiting = []
 
 def send_msgs(msg)
 	if not connectionOpen and msg
+		console.log(`waiting {msg_waiting.length}`)
 		msg_waiting.push(msg)
 		return
 	if msg_waiting.length > 0
@@ -164,7 +165,7 @@ def wait_a_second_and_retry
 	setTimeout(&,1000) do
 		console.log('waited! errors=' + n_errors)  
 		if n_errors > 10
-			console.log("restart server")
+			console.error("restart server")
 			app_in_error = true
 			process.exit(12)
 		console.log("try to establish connection")
@@ -175,8 +176,14 @@ def ping
 	send_msgs(pingmessage)
 	setTimeout(&,15000) do
 		console.log('Send ping if outstanding pings < 3: ' + n_pings)
-		if n_pings >= 3
-			console.log("restart server")
+		if n_pings = 2
+			console.error("close connection")
+			if wss
+				wss.close()
+			initiate_connection()
+			return
+		if n_pings = 4
+			console.error("restart server")
 			process.exit(12)
 			return
 		ping()
