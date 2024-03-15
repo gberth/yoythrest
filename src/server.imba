@@ -35,6 +35,13 @@ def send_msgs(msg)
 		console.dir(msg)
 		wss.send(JSON.stringify(msg))
 
+def wait_for_open_retry_if_not_ok 
+	setTimeout(&,1000) do
+		console.log(`waited! open open? {connectionOpen}`)  
+		if not connectionOpen
+			initiate_connection()
+
+
 def encrypt_secret(key, secret)
 	let usekey
 	if not (key.startsWith("---") or key.startsWith("ssh"))
@@ -92,6 +99,7 @@ def initiate_connection
 	wss = new WebSocket(
 		process.env.YOYTHWSADDRESS
 	);
+	wait_for_open_retry_if_not_ok()
 	wss.on("open", do 
 		connectionOpen = true;
 		console.log("open")
