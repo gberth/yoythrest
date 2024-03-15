@@ -42,6 +42,15 @@ def wait_for_open_retry_if_not_ok
 		if not connectionOpen
 			initiate_connection()
 
+def wait_a_second_and_retry 
+	setTimeout(&,1000) do
+		console.log('waited! errors=' + n_errors)  
+		if n_errors > 10
+			console.error("restart server")
+			app_in_error = true
+			process.exit(12)
+		console.log("try to establish connection")
+		initiate_connection()
 
 def encrypt_secret(key, secret)
 	let usekey
@@ -161,28 +170,18 @@ def initiate_connection
 		wait_a_second_and_retry()
 	)
 
-def wait_a_second_and_retry 
-	setTimeout(&,1000) do
-		console.log('waited! errors=' + n_errors)  
-		if n_errors > 10
-			console.error("restart server")
-			app_in_error = true
-			process.exit(12)
-		console.log("try to establish connection")
-		initiate_connection()
-
 def ping 
 	n_pings += 1
 	send_msgs(pingmessage)
 	setTimeout(&,15000) do
-		console.log('Send ping if outstanding pings < 3: ' + n_pings)
-		if n_pings = 2
+		console.log('Send ping if outstanding pings <=4 : ' + n_pings)
+		if n_pings > 2
 			console.error("close connection")
 			if wss
 				wss.close()
 			initiate_connection()
 			return
-		if n_pings = 4
+		if n_pings > 4
 			console.error("restart server")
 			process.exit(12)
 			return
