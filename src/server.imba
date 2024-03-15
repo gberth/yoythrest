@@ -9,11 +9,6 @@ import fs from "fs";
 import {get_type, get_original_type, msg_ok, is_ack} from "./app/controls/helpers.imba"
 
 
-# A simple state that exists until the server stops
-const state = {
-	count: 0,
-}
-
 # Using Imba with Express as the server is quick to set up:
 const app = express()
 const port = process.env.PORT or 3000
