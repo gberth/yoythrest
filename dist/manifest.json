@@ -1,0 +1,14 @@
+{
+  "entry:src/app/yoythrest.imba?web": {
+    "url": "./assets/yoythrest.ZUEHCHJ7.js",
+    "path": "/home/gunnar/yoyth/yoythrest/dist/public/assets/yoythrest.ZUEHCHJ7.js"
+  },
+  "*?css": {
+    "url": "./assets/index.VW9NQJUX.css",
+    "path": "/home/gunnar/yoyth/yoythrest/dist/public/assets/index.VW9NQJUX.css"
+  },
+  "./assets/yoythrest.ZUEHCHJ7.js": {},
+  "./assets/yoythrest.3LJQXUBT.css": {},
+  "./assets/index.VW9NQJUX.css": {},
+  "main": "server.js"
+}
