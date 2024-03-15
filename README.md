@@ -1,3 +1,3 @@
 # yoythrest
-simple rest endpoint
+simple rest endpoint to go with yts
 x
