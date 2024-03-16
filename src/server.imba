@@ -27,9 +27,10 @@ def connectionOk(force=false)
 
 	console.error(`ws status? {wss.readyState} connected {connected}`)  
 	if wss
-		if not wss.readyState === WebSocket.OPEN
+		if wss.readyState !== WebSocket.OPEN
 			connected = false
-			if not wss.readyState === WebSocket.CONNECTING
+			if wss.readyState !== WebSocket.CONNECTING
+				console.error("Try new connect")
 				initiate_connection()
 			return false
 	else
