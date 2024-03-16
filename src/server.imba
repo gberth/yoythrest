@@ -21,14 +21,29 @@ let n_pings = 0
 let app_in_error = false
 let msg_waiting = []
 
-def connectionOk
-	return wss and wss.readyState === WebSocket.OPEN
+def connectionOk(force=false)
+	if wss and wss.readyState === WebSocket.OPEN and (connected or force)
+		return true
 
-def send_msgs(msg)
-	if not connectionOk() and msg
-		console.log(`waiting {msg_waiting.length}`)
-		msg_waiting.push(msg)
+	console.error(`ws status? {wss.readyState} connected {connected}`)  
+	if wss
+		if not wss.readyState === WebSocket.OPEN
+			connected = false
+			if not wss.readyState === WebSocket.CONNECTING
+				initiate_connection()
+			return false
+	else
+		initiate_connection()
+	return false
+
+
+def send_msgs(msg, force=false)
+	if not connectionOk(force)
+		console.error(`waiting {msg_waiting.length}`)
+		if msg
+			msg_waiting.push(msg)
 		return
+
 	if msg_waiting.length > 0
 		for m in msg_waiting
 			console.dir(m)
@@ -38,34 +53,13 @@ def send_msgs(msg)
 		console.dir(msg)
 		wss.send(JSON.stringify(msg))
 
-def wait_for_open_retry_if_not_ok 
-	setTimeout(&,1000) do
-		console.log(`waited! open open? {connectionOk()}`)  
-		if not connectionOk()
-			initiate_connection()
-
-def wait_a_second_and_retry 
-	setTimeout(&,1000) do
-		console.log('waited! errors=' + n_errors)  
-		if n_errors > 10
-			console.error("restart server")
-			app_in_error = true
-			process.exit(12)
-		console.log("try to establish connection")
-		initiate_connection()
-
 def ping 
 	n_pings += 1
-	send_msgs(pingmessage)
+	send_msgs(pingmessage, false)
 	setTimeout(&,15000) do
 		console.log('Send ping if outstanding pings <=4 : ' + n_pings)
-		if n_pings > 2
-			console.error("close connection")
-			if wss
-				wss.close()
-			initiate_connection()
-			return
-		ping()
+		if wss and wss.readyState === WebSocket.OPEN
+			ping()
 
 def encrypt_secret(key, secret)
 	let usekey
@@ -124,10 +118,9 @@ def initiate_connection
 	wss = new WebSocket(
 		process.env.YOYTHWSADDRESS
 	);
-	wait_for_open_retry_if_not_ok()
 	wss.on("open", do 
 		console.log("open")
-		send_msgs(undefined)
+		send_msgs(undefined, true)
 		ping())
 	wss.on("message", do |msgin|
 		console.log(msgin)
@@ -141,13 +134,13 @@ def initiate_connection
 					connection_id: smsg.connection_id,
 					reconnect_id: connection_id,
 					identity: process.env.YOYTHRESTID
-				})
+				}, true)
 				return;
 			if smsg.reconnected
 				console.log("reconnected")
 				connected = true
 				return
-			send_msgs(openmessage)
+			send_msgs(openmessage, true)
 		if smsg.message_data
 			// can be ack on login or ping
 			if is_ack(smsg)
@@ -173,14 +166,12 @@ def initiate_connection
 		console.dir(reason)
 		n_errors += 1
 		connected = false
-		wait_a_second_and_retry()
 	)
 	wss.on("error", do |error|
 		n_errors += 1
 		console.log("error")
-		console.dir(error)
+		console.dir(error)		
 		connected = false
-		wait_a_second_and_retry()
 	)
 
 initiate_connection()
