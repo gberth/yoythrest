@@ -13,7 +13,6 @@ import {get_type, get_original_type, msg_ok, is_ack} from "./app/controls/helper
 const app = express()
 const port = process.env.PORT or 3000
 let wss
-let connectionOpen = false
 let connected = false
 let connection_id
 let n_errors = 0
@@ -22,8 +21,11 @@ let n_pings = 0
 let app_in_error = false
 let msg_waiting = []
 
+def connectionOk
+	return wss and wss.readyState === WebSocket.OPEN
+
 def send_msgs(msg)
-	if not connectionOpen and msg
+	if not connectionOk() and msg
 		console.log(`waiting {msg_waiting.length}`)
 		msg_waiting.push(msg)
 		return
@@ -38,8 +40,8 @@ def send_msgs(msg)
 
 def wait_for_open_retry_if_not_ok 
 	setTimeout(&,1000) do
-		console.log(`waited! open open? {connectionOpen}`)  
-		if not connectionOpen
+		console.log(`waited! open open? {connectionOk()}`)  
+		if not connectionOk()
 			initiate_connection()
 
 def wait_a_second_and_retry 
@@ -62,10 +64,6 @@ def ping
 			if wss
 				wss.close()
 			initiate_connection()
-			return
-		if n_pings > 4
-			console.error("restart server")
-			process.exit(12)
 			return
 		ping()
 
@@ -128,7 +126,6 @@ def initiate_connection
 	);
 	wait_for_open_retry_if_not_ok()
 	wss.on("open", do 
-		connectionOpen = true;
 		console.log("open")
 		send_msgs(undefined)
 		ping())
@@ -176,7 +173,6 @@ def initiate_connection
 		console.dir(reason)
 		n_errors += 1
 		connected = false
-		connectionOpen = false;
 		wait_a_second_and_retry()
 	)
 	wss.on("error", do |error|
@@ -184,7 +180,6 @@ def initiate_connection
 		console.log("error")
 		console.dir(error)
 		connected = false
-		connectionOpen = false;
 		wait_a_second_and_retry()
 	)
 
