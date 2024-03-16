@@ -52,6 +52,23 @@ def wait_a_second_and_retry
 		console.log("try to establish connection")
 		initiate_connection()
 
+def ping 
+	n_pings += 1
+	send_msgs(pingmessage)
+	setTimeout(&,15000) do
+		console.log('Send ping if outstanding pings <=4 : ' + n_pings)
+		if n_pings > 2
+			console.error("close connection")
+			if wss
+				wss.close()
+			initiate_connection()
+			return
+		if n_pings > 4
+			console.error("restart server")
+			process.exit(12)
+			return
+		ping()
+
 def encrypt_secret(key, secret)
 	let usekey
 	if not (key.startsWith("---") or key.startsWith("ssh"))
@@ -113,7 +130,8 @@ def initiate_connection
 	wss.on("open", do 
 		connectionOpen = true;
 		console.log("open")
-		send_msgs(undefined))
+		send_msgs(undefined)
+		ping())
 	wss.on("message", do |msgin|
 		console.log(msgin)
 		const smsg = JSON.parse(msgin);
@@ -170,25 +188,7 @@ def initiate_connection
 		wait_a_second_and_retry()
 	)
 
-def ping 
-	n_pings += 1
-	send_msgs(pingmessage)
-	setTimeout(&,15000) do
-		console.log('Send ping if outstanding pings <=4 : ' + n_pings)
-		if n_pings > 2
-			console.error("close connection")
-			if wss
-				wss.close()
-			initiate_connection()
-			return
-		if n_pings > 4
-			console.error("restart server")
-			process.exit(12)
-			return
-		ping()
-
 initiate_connection()
-ping()
 
 # Express works like usual, so we can allow JSON in the POST request:
 const jsonBody = express.json({ limit: '1kb' })
